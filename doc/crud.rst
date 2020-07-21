@@ -118,7 +118,7 @@ Entity Options
 
             // the singular label method can define a second optional argument as
             // a closure which receives the instance of the current entity
-            // (this is only available in the DETAIL and EDIT pages)
+            // (this is only used in the DETAIL and EDIT pages, where the entity is defined)
             ->setEntityLabelInSingular('Product', function(Product $product) => (string) $product)
             ->setEntityLabelInSingular('Category', fn (Category $category) => $category->getLabel())
 
