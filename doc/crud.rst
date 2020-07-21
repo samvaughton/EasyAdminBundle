@@ -116,6 +116,12 @@ Entity Options
             ->setEntityLabelInSingular('Product')
             ->setEntityLabelInPlural('Products')
 
+            // the singular label method can define a second optional argument as
+            // a closure which receives the instance of the current entity
+            // (this is only available in the DETAIL and EDIT pages)
+            ->setEntityLabelInSingular('Product', function(Product $product) => (string) $product)
+            ->setEntityLabelInSingular('Category', fn (Category $category) => $category->getLabel())
+
             // the Symfony Security permission needed to manage the entity
             // (none by default, so you can manage all instances of the entity)
             ->setEntityPermission('ROLE_EDITOR')
@@ -133,6 +139,11 @@ Title and Help Options
             // the visible title at the top of the page and the content of the <title> element
             // it can include these placeholders: %entity_id%, %entity_label_singular%, %entity_label_plural%
             ->setPageTitle('index', '%entity_label_plural% listing')
+
+            // in DETAIL and EDIT pages the title can be a closure which receives the
+            // instance of the current page entity
+            ->setPageTitle('detail', function(Product $product) => (string) $product)
+            ->setPageTitle('edit', fn (Category $category) => sprintf('Editing <b>%s</b>', $category->getName()))
 
             // the help message displayed to end users (it can contain HTML tags)
             ->setHelp('edit', '...')
