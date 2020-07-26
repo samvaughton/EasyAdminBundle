@@ -116,11 +116,15 @@ Entity Options
             ->setEntityLabelInSingular('Product')
             ->setEntityLabelInPlural('Products')
 
-            // the singular label method can define a second optional argument as
-            // a closure which receives the instance of the current entity
-            // (this is only used in the DETAIL and EDIT pages, where the entity is defined)
-            ->setEntityLabelInSingular('Product', function(Product $product) => (string) $product)
-            ->setEntityLabelInSingular('Category', fn (Category $category) => $category->getLabel())
+            // in addition to a string, the argument of the singular label method can
+            // be a closure that receives both the current entity instance (which will
+            // be null in 'index' and 'new' pages) and the page name
+            ->setEntityLabelInSingular(
+                fn (?Product $product, string $pageName) => $product ? $product->toString() : 'Product'
+            )
+            ->setEntityLabelInSingular(function (?Category $category, string $pageName) {
+                return 'edit' === $pageName ? $category->getLabel() : 'Category';
+            })
 
             // the Symfony Security permission needed to manage the entity
             // (none by default, so you can manage all instances of the entity)
