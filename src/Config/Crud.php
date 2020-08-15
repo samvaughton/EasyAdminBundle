@@ -35,9 +35,9 @@ class Crud
         return new self($dto);
     }
 
-    public function setEntityLabelInSingular(string $label): self
+    public function setEntityLabelInSingular(string $label, ?callable $labelCallable = null): self
     {
-        $this->dto->setEntityLabelInSingular($label);
+        $this->dto->setEntityLabelInSingular($label, $labelCallable);
 
         return $this;
     }
@@ -49,13 +49,17 @@ class Crud
         return $this;
     }
 
-    public function setPageTitle(string $pageName, string $title): self
+    public function setPageTitle(string $pageName, $titleOrCallable): self
     {
         if (!\in_array($pageName, $this->getValidPageNames(), true)) {
             throw new \InvalidArgumentException(sprintf('The first argument of the "%s()" method must be one of these valid page names: %s ("%s" given).', __METHOD__, implode(', ', $this->getValidPageNames()), $pageName));
         }
 
-        $this->dto->setCustomPageTitle($pageName, $title);
+        if (\is_callable($titleOrCallable) && \in_array($pageName, [self::PAGE_INDEX, self::PAGE_NEW], true)) {
+            throw new \InvalidArgumentException(sprintf('The page title can be a callable only in the "%s" and "%s" pages. Use a string for the title of the "%s" page.', self::PAGE_DETAIL, self::PAGE_EDIT, $pageName));
+        }
+
+        $this->dto->setCustomPageTitle($pageName, $titleOrCallable);
 
         return $this;
     }

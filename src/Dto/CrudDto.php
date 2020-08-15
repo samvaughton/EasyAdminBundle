@@ -18,6 +18,7 @@ final class CrudDto
     private $filters;
     private $entityFqcn;
     private $entityLabelInSingular;
+    private $entityLabelInSingularCallable;
     private $entityLabelInPlural;
     private $defaultPageTitles = [
         Crud::PAGE_DETAIL => 'page_title.detail',
@@ -26,6 +27,7 @@ final class CrudDto
         Crud::PAGE_NEW => 'page_title.new',
     ];
     private $customPageTitles;
+    private $customPageTitleCallables;
     private $helpMessages;
     private $datePattern;
     private $timePattern;
@@ -47,6 +49,7 @@ final class CrudDto
     public function __construct()
     {
         $this->customPageTitles = [Crud::PAGE_DETAIL => null, Crud::PAGE_EDIT => null, Crud::PAGE_INDEX => null, Crud::PAGE_NEW => null];
+        $this->customPageTitleCallables = [Crud::PAGE_DETAIL => null, Crud::PAGE_EDIT => null, Crud::PAGE_INDEX => null, Crud::PAGE_NEW => null];
         $this->helpMessages = [Crud::PAGE_DETAIL => null, Crud::PAGE_EDIT => null, Crud::PAGE_INDEX => null, Crud::PAGE_NEW => null];
         $this->datePattern = 'MMM d, y';
         $this->timePattern = 'h:mm:ss a';
@@ -91,14 +94,19 @@ final class CrudDto
         $this->entityFqcn = $entityFqcn;
     }
 
-    public function getEntityLabelInSingular(): ?string
+    public function getEntityLabelInSingular($entityInstance = null): ?string
     {
+        if (null !== $entityInstance && null !== $callable = $this->entityLabelInSingularCallable) {
+            return $callable($entityInstance);
+        }
+
         return $this->entityLabelInSingular;
     }
 
-    public function setEntityLabelInSingular(string $label): void
+    public function setEntityLabelInSingular(string $label, ?callable $labelCallable = null): void
     {
         $this->entityLabelInSingular = $label;
+        $this->entityLabelInSingularCallable = $labelCallable;
     }
 
     public function getEntityLabelInPlural(): ?string
@@ -111,14 +119,23 @@ final class CrudDto
         $this->entityLabelInPlural = $label;
     }
 
-    public function getCustomPageTitle(string $pageName = null): ?string
+    public function getCustomPageTitle(string $pageName = null, $entityInstance = null): ?string
     {
+        $callable = $this->customPageTitleCallables[$pageName ?? $this->pageName];
+        if (null !== $entityInstance && null !== $callable) {
+            return $callable($entityInstance);
+        }
+
         return $this->customPageTitles[$pageName ?? $this->pageName] ?? null;
     }
 
-    public function setCustomPageTitle(string $pageName, string $pageTitle): void
+    public function setCustomPageTitle(string $pageName, $pageTitleOrCallable): void
     {
-        $this->customPageTitles[$pageName] = $pageTitle;
+        if (\is_callable($pageTitleOrCallable)) {
+            $this->customPageTitleCallables[$pageName] = $pageTitleOrCallable;
+        } else {
+            $this->customPageTitles[$pageName] = $pageTitleOrCallable;
+        }
     }
 
     public function getDefaultPageTitle(string $pageName = null): ?string
